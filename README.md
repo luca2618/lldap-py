@@ -11,6 +11,8 @@ You can install the package via pip:
 
 ``` pip install lldap-py ```
 
+https://pypi.org/project/lldap-py
+
 ## Requirements
 - Python 3.8+
 - requests
