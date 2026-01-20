@@ -6,6 +6,11 @@ Python client library for managing LLDAP servers  [lldap/lldap](https://github.c
 
 This package provides a Python interface to interact with LLDAP servers for user and group management. The idea is that it would be used in an onboarding/offboarding automation script and make similar automation tasks easier.
 
+### Installation
+You can install the package via pip:
+
+``` pip install lldap-py ```
+
 ## Requirements
 - Python 3.8+
 - requests
