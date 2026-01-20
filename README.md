@@ -1,6 +1,6 @@
 # lldap-py
 
-Python client library for managing LLDAP servers.
+Python client library for managing LLDAP servers  [lldap/lldap](https://github.com/lldap/lldap)
 
 ## Usage
 
