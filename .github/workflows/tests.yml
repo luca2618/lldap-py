@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.11']
+
+    services:
+      lldap:
+        image: lldap/lldap:stable
+        ports:
+          - 3890:3890
+          - 17170:17170
+        env:
+          UID: 1000
+          GID: 1000
+          LLDAP_JWT_SECRET: test-secret-key
+          LLDAP_KEY_SEED: test-seed-key
+          LLDAP_LDAP_USER_PASS: password
+        options: >-
+          --health-cmd "curl -f http://localhost:17170 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Wait for LLDAP to be ready
+      run: |
+        for i in {1..30}; do
+          curl -f http://localhost:17170 && break
+          echo "Waiting for LLDAP... ($i/30)"
+          sleep 2
+        done
+
+    - name: Run tests with pytest
+      run: |
+        pytest tests/ -v
