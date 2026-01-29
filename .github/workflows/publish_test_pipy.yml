@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
+      name: testpypi
       url: https://test.pypi.org/p/lldap-py/
 
     permissions:
