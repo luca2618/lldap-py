@@ -28,10 +28,10 @@ services:
           LLDAP_LDAP_USER_PASS: password
           LLDAP_LDAPS_OPTIONS__ENABLED: "true"
           LLDAP_LDAPS_OPTIONS__CERT_FILE: /etc/ssl/certs/lldap.crt
-          LLDAP_LDAPS_OPTIONS__KEY_FILE: /etc/ssl/private/lldap.key
+          LLDAP_LDAPS_OPTIONS__KEY_FILE: /etc/ssl/certs/lldap.key
         volumes:
           - ./certs/lldap.crt:/etc/ssl/certs/lldap.crt:ro
-          - ./certs/lldap.key:/etc/ssl/private/lldap.key:ro
+          - ./certs/lldap.key:/etc/ssl/certs/lldap.key:ro
         healthcheck:
           test: ["CMD", "curl", "-k", "-f", "http://localhost:17170"]
           interval: 10s
