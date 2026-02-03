@@ -198,6 +198,32 @@ class UserManager:
         result = self.client.query(query, variables)
         return result.get("data", {}).get("removeUserFromGroup", {}).get("ok", False)
     
+    def set_password(self, user_id: str, new_password: str) -> bool:
+        """Set password for a user.
+        
+        Args:
+            user_id: User ID
+            new_password: New password"""
+        user_dn = self.client.create_bind_dn(user_id)
+
+        res = self.client.ensure_ldap_connection()
+        self.client.conn.extend.standard.modify_password(
+                user=user_dn,
+                old_password='',
+                new_password=new_password
+            )
+        # try:
+        #     user_dn = self.client.create_bind_dn(user_id)
+
+        #     self.ensure_ldap_connection()
+        #     self.conn.extend.standard.modify_password(
+        #             user=user_dn,
+        #             old_password='',
+        #             new_password=new_password
+        #         )
+        # except Exception:
+        #     return False
+        return True
  
     
     

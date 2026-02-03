@@ -54,6 +54,7 @@ class LLDAPClient:
                 url,
                 json=payload,
                 headers={"Content-Type": "application/json"},
+                verify=self.config.verify_ssl,
             )
             
             if response.status_code != 200:
@@ -94,6 +95,7 @@ class LLDAPClient:
             response = self.session.get(
                 url,
                 cookies={"refresh_token": refresh_token},
+                verify=self.config.verify_ssl,
             )
             
             if response.status_code != 200:
@@ -128,6 +130,7 @@ class LLDAPClient:
             response = self.session.get(
                 url,
                 cookies={"refresh_token": self.config.refresh_token},
+                verify=self.config.verify_ssl,
             )
             return response.status_code == 200
             
@@ -171,7 +174,7 @@ class LLDAPClient:
         data = json.dumps(payload)
         
         try:
-            response = self.session.post(url, data=data, headers=headers)
+            response = self.session.post(url, data=data, headers=headers, verify=self.config.verify_ssl)
             
             # Check for HTTP errors
             if response.status_code == 401:
@@ -200,14 +203,26 @@ class LLDAPClient:
         if not self.config.token:
             self.authenticate()
     
+    def create_bind_dn(self, user_id: str) -> str:
+        """Create bind DN for a user.
+        
+        Args:
+            user_id: User ID """
+        if self.config.base_dn is None:
+            raise ValueError("base_dn is not configured")
+        return f"uid={user_id},ou=people,{self.config.base_dn}"
+    
     def ensure_ldap_connection(self) -> bool:
         from ldap3 import Server, Connection, ALL, MODIFY_REPLACE
-        if (self.config.ldap_server is not None) and (self.config.ldap_base_dn is not None):
+        if (self.config.ldap_server is not None) and (self.config.base_dn is not None):
             conn = None
             try:
+                login_dn = self.create_bind_dn(self.config.username)
                 server = Server(self.config.ldap_server, get_info=ALL)
-                conn = Connection(server, self.config.ldap_bind_dn, self.config.ldap_bind_password, auto_bind=True)
+                self.conn = Connection(server, login_dn, self.config.password, auto_bind=True)
             except Exception:
                 return False
             return True
         return False
+
+

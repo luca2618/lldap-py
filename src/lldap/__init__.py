@@ -23,6 +23,9 @@ class LLDAPManager(UserManager, GroupManager):
         password: str = None,
         token: str = None,
         refresh_token: str = None,
+        base_dn: str = None,
+        ldap_server: str = None,
+        verify_ssl: bool = True
     ):
         """Initialize LLDAP Manager with connection details.
         
@@ -32,7 +35,7 @@ class LLDAPManager(UserManager, GroupManager):
             password: Admin password
             token: Authentication token (if already authenticated)
             refresh_token: Refresh token for token renewal
-            
+            verify_ssl: Whether to verify SSL certificates (default: True)
         Raises:
             AuthenticationError: If connection/authentication fails
         """
@@ -42,6 +45,9 @@ class LLDAPManager(UserManager, GroupManager):
             password=password,
             token=token,
             refresh_token=refresh_token,
+            base_dn=base_dn,
+            ldap_server=ldap_server,
+            verify_ssl=verify_ssl,
         )
         
         try:

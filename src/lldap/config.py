@@ -11,9 +11,10 @@ class Config:
         password: Optional[str] = None,
         token: Optional[str] = None,
         refresh_token: Optional[str] = None,
-        user_dn: Optional[str] = None,
+        base_dn: Optional[str] = None,
         ldap_server: Optional[str] = None,
         endpoints: Optional[Dict[str, str]] = None,
+        verify_ssl: bool = True,
     ):
 
         self.http_url = http_url
@@ -21,8 +22,9 @@ class Config:
         self.password = password
         self.token = token
         self.refresh_token = refresh_token
-        self.user_dn = user_dn
+        self.base_dn = base_dn
         self.ldap_server = ldap_server
+        self.verify_ssl = verify_ssl
         self.endpoints = endpoints or {
             "auth": "/auth/simple/login",
             "graphql": "/api/graphql",
