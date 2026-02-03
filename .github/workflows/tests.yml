@@ -26,6 +26,11 @@ jobs:
         cd tests
         docker compose -f docker-compose.yml up -d
         cd ..
+    - name: Check container logs on failure
+      if: failure()
+      run: |
+        docker compose -f tests/docker-compose.yml logs lldap-secure
+        docker compose -f tests/docker-compose.yml logs lldap
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
