@@ -5,14 +5,37 @@ from lldap.groups import Group
 
 
 @pytest.fixture(scope="session")
-def manager():
-    """Create a manager instance for all tests."""
+def manager_unsecure():
+    """Manager instance for unsecure connection"""
     config = {
         "http_url": "http://localhost:17170",
         "username": "admin",
         "password": "password",
+        "base_dn": "dc=example,dc=com",
+        "ldap_server": "ldap://localhost:3890",
     }
     return LLDAPManager(**config)
+
+@pytest.fixture(scope="session")
+def manager_secure():
+    """Manager instance for secure connection"""
+    config = {
+        "http_url": "https://localhost",  # Different endpoint
+        "username": "admin",
+        "password": "password",
+        "base_dn": "dc=example,dc=com",
+        "ldap_server": "ldaps://localhost:6360",  # Using LDAPS
+        "verify_ssl": False, # Disable SSL verification for testing
+    }
+    return LLDAPManager(**config)
+
+@pytest.fixture(scope="session", params=["unsecure", "secure"])
+def manager(request):
+    """Parametrized manager fixture."""
+    if request.param == "unsecure":
+        return request.getfixturevalue("manager_unsecure")
+    else:
+        return request.getfixturevalue("manager_secure")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -414,3 +437,51 @@ def test_full_group_lifecycle(manager):
     # Cleanup users
     manager.delete_user("testuser_cycle1")
     manager.delete_user("testuser_cycle2")
+
+
+# ========== Password Management Tests ==========
+
+def test_set_password_and_login(manager):
+    """Test setting password for a new user and logging in with it."""
+    # Create a new test user
+    user_id = "testuser_password"
+    test_password = "TestPassword123!@#"
+    
+    result = manager.create_user(
+        user_id=user_id,
+        email="testuser_password@test.com",
+        first_name="Password",
+        last_name="Test",
+    )
+    
+    assert result is not None
+    assert result.get("id") == user_id
+    
+    # Set password for the user
+    password_set = manager.set_password(user_id, test_password)
+    assert password_set is True
+    
+    # Try to authenticate with the new user credentials
+    from lldap import LLDAPManager
+    new_manager = LLDAPManager(
+        http_url= manager.config.http_url,
+        username=user_id,
+        password=test_password,
+        base_dn= manager.config.base_dn,
+        ldap_server= manager.config.ldap_server,
+        verify_ssl= manager.config.verify_ssl
+    )
+
+
+    try:
+        token, refresh_token = new_manager.client.authenticate()
+        assert token is not None
+        assert isinstance(token, str)
+        assert len(token) > 0
+    except (AuthenticationError, ConnectionError):
+        pytest.fail(f"Failed to authenticate with user {user_id} after setting password")
+    assert new_manager.client.ensure_ldap_connection() is True
+    # Cleanup
+    manager.delete_user(user_id)
+
+    
