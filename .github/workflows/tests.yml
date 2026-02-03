@@ -48,8 +48,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          -v ${{ github.workspace }}/lldap-certs/lldap.crt:/etc/ssl/certs/lldap.crt:ro
-          -v ${{ github.workspace }}/lldap-certs/lldap.key:/etc/ssl/private/lldap.key:ro
+          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/certs/:ro
+          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/private/:ro
       lldap-https-proxy:
         image: nginx:latest
         ports:
@@ -57,8 +57,8 @@ jobs:
           - 80:80
         options: >-
           -v ${{ github.workspace }}/tests/nginx.conf:/etc/nginx/nginx.conf:ro
-          -v ${{ github.workspace }}/lldap-certs/proxy.crt:/etc/ssl/certs/proxy.crt:ro
-          -v ${{ github.workspace }}/lldap-certs/proxy.key:/etc/ssl/private/proxy.key:ro
+          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/certs/:ro
+          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/private/:ro
           --health-cmd "curl -k -f https://localhost/health || exit 1"
           --health-interval 10s
           --health-timeout 5s
