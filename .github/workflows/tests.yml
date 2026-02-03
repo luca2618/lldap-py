@@ -20,17 +20,17 @@ jobs:
         mkdir -p tests/certs
         openssl req -x509 -newkey rsa:2048 -keyout tests/certs/lldap.key -out tests/certs/lldap.crt -days 365 -nodes -subj /CN=localhost
         openssl req -x509 -newkey rsa:2048 -keyout tests/certs/proxy.key -out tests/certs/proxy.crt -days 365 -nodes -subj /CN=localhost
-
+    
     - name: Start services with Docker Compose
       run: |
-        cd tests
-        docker compose -f docker-compose.yml up -d
-        cd ..
+        docker compose -f tests/docker-compose.yml up -d
     - name: Check container logs on failure
       if: failure()
       run: |
         docker compose -f tests/docker-compose.yml logs lldap-secure
         docker compose -f tests/docker-compose.yml logs lldap
+        ls -la tests/
+        ls -la tests/certs/
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
