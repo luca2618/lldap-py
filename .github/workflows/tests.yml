@@ -24,7 +24,7 @@ jobs:
     - name: Start services with Docker Compose
       run: |
         cd tests
-        docker compose -f tests/docker-compose.yml up -d
+        docker compose -f docker-compose.yml up -d
         cd ..
 
     - name: Set up Python ${{ matrix.python-version }}
