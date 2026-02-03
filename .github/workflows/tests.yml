@@ -12,70 +12,18 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.8', '3.11']
-
-    services:
-      lldap:
-        image: lldap/lldap:stable
-        ports:
-          - 3890:3890
-          - 17170:17170
-        env:
-          UID: 1000
-          GID: 1000
-          LLDAP_JWT_SECRET: test-secret-key
-          LLDAP_KEY_SEED: test-seed-key
-          LLDAP_LDAP_USER_PASS: password
-        options: >-
-          --health-cmd "curl -f http://localhost:17170 || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      lldap-secure:
-        image: lldap/lldap:stable
-        ports:
-          - 6360:6360
-        env:
-          UID: 1000
-          GID: 1000
-          LLDAP_JWT_SECRET: test-secret-key
-          LLDAP_KEY_SEED: test-seed-key
-          LLDAP_LDAP_USER_PASS: password
-          LLDAP_LDAPS_OPTIONS__ENABLED: true
-          LLDAP_LDAPS_OPTIONS__CERT_FILE: /etc/ssl/certs/lldap.crt
-          LLDAP_LDAPS_OPTIONS__KEY_FILE: /etc/ssl/private/lldap.key
-        options: >-
-          --health-cmd "curl -k -f https://localhost:17171 || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/certs/:ro
-          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/private/:ro
-      lldap-https-proxy:
-        image: nginx:latest
-        ports:
-          - 443:443
-          - 80:80
-        options: >-
-          -v ${{ github.workspace }}/tests:/etc/nginx:ro
-          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/certs/:ro
-          -v ${{ github.workspace }}/lldap-certs/:/etc/ssl/private/:ro
-          --health-cmd "curl -k -f https://localhost/health || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v4
 
-    - name: Generate SSL certificates for nginx proxy
+    - name: Generate SSL certificates for services
       run: |
-        mkdir -p /proxy-certs
-        openssl req -x509 -newkey rsa:2048 -keyout /proxy-certs/proxy.key -out /proxy-certs/proxy.crt -days 365 -nodes -subj '/CN=localhost'
+        mkdir -p tests/certs
+        openssl req -x509 -newkey rsa:2048 -keyout tests/certs/lldap.key -out tests/certs/lldap.crt -days 365 -nodes -subj '/CN=localhost'
+        openssl req -x509 -newkey rsa:2048 -keyout tests/certs/proxy.key -out tests/certs/proxy.crt -days 365 -nodes -subj '/CN=localhost'
 
-    - name: Generate SSL certificates for secure LLDAP
+    - name: Start services with Docker Compose
       run: |
-        mkdir -p ./lldap-certs
-        openssl req -x509 -newkey rsa:2048 -keyout ./lldap-certs/lldap.key -out ./lldap-certs/lldap.crt -days 365 -nodes -subj '/CN=localhost'
+        docker compose -f tests/docker-compose.yml up -d
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -100,3 +48,8 @@ jobs:
     - name: Run tests with pytest
       run: |
         pytest tests/ -v
+
+    - name: Stop services
+      if: always()
+      run: |
+        docker compose -f tests/docker-compose.yml down -v
