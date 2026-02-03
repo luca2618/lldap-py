@@ -23,7 +23,9 @@ jobs:
 
     - name: Start services with Docker Compose
       run: |
+        cd tests
         docker compose -f tests/docker-compose.yml up -d
+        cd ..
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
