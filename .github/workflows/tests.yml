@@ -63,11 +63,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        depends_on:
-          lldap:
-            condition: service_healthy
-          lldap-secure:
-            condition: service_healthy
 
     steps:
     - uses: actions/checkout@v4
