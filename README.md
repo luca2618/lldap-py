@@ -24,8 +24,6 @@ https://pypi.org/project/lldap-py
 - Maybe improve error handling and passing of graphql errors to the user.
 - Add more examples and documentation.
 - Check coverage of tests
-- Add support for direct LDAP operations alongside GraphQL(Mainly for password management, to be used for initial random password generation).
-- Test against https (and ldaps connections for above point).
 - Add support for costum user and group attributes.
 
 ## Credit
