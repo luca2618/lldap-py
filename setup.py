@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lldap-py",
-    version="0.1.0",
+    version="0.2.0",
     author="Lucas Sylvester",
     description="Python tool for managing LLDAP servers",
     long_description=long_description,
@@ -17,7 +17,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: System Administrators",
         "Topic :: System :: Systems Administration :: Authentication/Directory :: LDAP",
         "License :: OSI Approved :: MIT License",
